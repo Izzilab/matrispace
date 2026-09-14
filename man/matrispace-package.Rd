@@ -15,7 +15,7 @@ includes functions for:
 \item Matrisome scoring using UCell signatures
 \item ECM niche classification using the ScType algorithm
 \item Spatial statistics (LISA, Moran's I)
-\item Ligand-receptor co-expression analysis
+\item Spatial co-expression analysis of unique heterotypic matrisome pairs
 \item Static visualizations for spatial data
 }
 }
@@ -27,7 +27,7 @@ includes functions for:
 \item{\code{\link{annotate_ecm_niches}}}{Classify ECM niches with ScType}
 \item{\code{\link{compute_lisa}}}{Local spatial association statistics}
 \item{\code{\link{compute_morans_i}}}{Global spatial autocorrelation}
-\item{\code{\link{score_lr_activity}}}{Ligand-receptor activity scoring}
+\item{\code{\link{score_lr_activity}}}{Matrisome-pair co-expression scoring}
 }
 }
 
@@ -37,7 +37,7 @@ includes functions for:
 \item{\code{\link{matrisome_db}}}{Gene-to-category mapping database}
 \item{\code{\link{matrisome_signatures}}}{UCell gene signatures}
 \item{\code{\link{ecm_signatures}}}{ECM niche signatures}
-\item{\code{\link{lr_database}}}{Ligand-receptor interaction pairs}
+\item{\code{\link{lr_database}}}{Unique heterotypic MatriComDB pairs}
 }
 }
 
@@ -56,7 +56,7 @@ includes functions for:
 }
 \seealso{
 The companion MatriSpace web application:
-\url{http://matrinet.shinyapps.io/matrispace}
+\url{https://izzilab-matrispace.share.connect.posit.cloud/}
 }
 \author{
 Ayomide Oshinjo, Daiqing Chen, Petar Petrov, Valerio Izzi, Alexandra Naba

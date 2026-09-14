@@ -1,4 +1,4 @@
-# Tests for ligand-receptor analysis functions
+# Tests for matrisome-pair co-expression functions
 
 test_that("lr_database loads correctly", {
   data(lr_database)
@@ -6,6 +6,26 @@ test_that("lr_database loads correctly", {
   expect_true("Ligand" %in% colnames(lr_database))
   expect_true("Receptor" %in% colnames(lr_database))
   expect_gt(nrow(lr_database), 10000)
+  expect_false(any(lr_database$Ligand == lr_database$Receptor))
+  canonical_pairs <- paste(
+    pmin(lr_database$Ligand, lr_database$Receptor),
+    pmax(lr_database$Ligand, lr_database$Receptor),
+    sep = "-"
+  )
+  expect_false(anyDuplicated(canonical_pairs) > 0)
+})
+
+test_that("pair preparation removes homomeric and reciprocal rows", {
+  pair_db <- data.frame(
+    Ligand = c("GeneB", "GeneA", "GeneC"),
+    Receptor = c("GeneA", "GeneB", "GeneC")
+  )
+
+  result <- .prepare_matrisome_pairs(pair_db)
+
+  expect_equal(nrow(result), 1)
+  expect_equal(result$Ligand, "GeneA")
+  expect_equal(result$Receptor, "GeneB")
 })
 
 test_that("aggregate_lr_axes handles empty input", {
@@ -23,7 +43,7 @@ test_that("aggregate_lr_axes handles empty input", {
   expect_equal(nrow(result$stats), 0)
 })
 
-test_that("aggregate_lr_axes identifies reciprocal pairs", {
+test_that("aggregate_lr_axes coalesces reciprocal rows without axis terminology", {
   # Create test data with reciprocal pair
   stats_df <- data.frame(
     feature = c("GeneA-GeneB", "GeneB-GeneA", "GeneC-GeneD"),
@@ -40,7 +60,8 @@ test_that("aggregate_lr_axes identifies reciprocal pairs", {
 
   result <- aggregate_lr_axes(stats_df, means_matrix)
 
-  # Should have 2 features: one axis and one regular
+  # Should have two unique unordered pairs
   expect_equal(nrow(result$stats), 2)
-  expect_true(any(grepl("_AXIS", result$stats$feature)))
+  expect_true("GeneA-GeneB" %in% result$stats$feature)
+  expect_false(any(grepl("_AXIS", result$stats$feature)))
 })

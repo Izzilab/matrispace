@@ -60,7 +60,7 @@ seurat_obj <- prepare_object(seurat_obj, verbose = FALSE)
 - ECM niche classification
 - Matrisome expression mapping
 - Spatial co-localization (LISA)
-- Ligand-receptor communication analysis
+- Spatial co-expression analysis of matrisome pairs
 
 **Test dataset:** Spatial transcriptomics sample with matrisome annotation
 
@@ -173,13 +173,13 @@ plot_spatial_blend(
 
 ---
 
-# Ligand-Receptor Analysis
+# Matrisome Pair Co-expression Analysis
 
-Spatial L-R scoring measures paracrine signaling: ligand expression in neighbors × receptor expression in spot.
+Matrisome-pair scoring measures spatial co-expression across adjacent spots for unique heterotypic MatriComDB pairs. It does not infer signaling direction or communication activity.
 
 ```{r lr-score, cache=TRUE}
 seurat_obj <- score_lr_activity(seurat_obj, verbose = FALSE)
-cat("L-R interactions scored:", nrow(seurat_obj[["LRACTIVITY"]]))
+cat("Matrisome pairs scored:", nrow(seurat_obj[["LRACTIVITY"]]))
 ```
 
 ## Enrichment by ECM Niche
@@ -227,7 +227,7 @@ ggplot(top_lr, aes(x = cluster, y = reorder(feature, avg_log2FC), fill = avg_log
     panel.grid = element_blank()
   ) +
   labs(x = NULL, y = NULL, fill = "log2FC",
-       title = "Top Enriched L-R Interactions")
+       title = "Top Enriched Matrisome Pairs")
 ```
 
 ---
@@ -316,8 +316,8 @@ ggplot(top_de, aes(x = cluster, y = reorder(gene, avg_log2FC), fill = avg_log2FC
 | `compute_lisa()` | Spatial co-localization statistics |
 | `plot_lisa()` | Visualize LISA clusters |
 | `plot_spatial_blend()` | Two-feature overlay |
-| `score_lr_activity()` | Ligand-receptor spatial scoring |
-| `find_lr_enrichment()` | L-R enrichment per group |
+| `score_lr_activity()` | Matrisome-pair spatial co-expression scoring |
+| `find_lr_enrichment()` | Matrisome-pair enrichment per group |
 | `find_ecm_markers()` | DE between two groups |
 | `find_all_ecm_markers()` | DE for all clusters |
 

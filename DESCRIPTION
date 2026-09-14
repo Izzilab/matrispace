@@ -17,10 +17,12 @@ Description: R package companion to MatriSpace for identification and
     visualization of spatially-resolved extracellular matrix gene expression
     patterns. Provides the core workflows used in the MatriSpace ecosystem,
     including matrisome scoring, ECM niche annotation, differential expression,
-    spatial statistics, ligand-receptor activity scoring, and visualization for
+    spatial statistics, matrisome-pair co-expression scoring, and visualization for
     Seurat and SpatialExperiment objects.
 License: GPL (>= 3) + file LICENSE
-URL: https://github.com/Theayomideo/matrispace, http://matrinet.shinyapps.io/matrispace
+URL: https://github.com/Theayomideo/matrispace,
+    https://github.com/izzilab/matrispace,
+    https://izzilab-matrispace.share.connect.posit.cloud/
 BugReports: https://github.com/Theayomideo/matrispace/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

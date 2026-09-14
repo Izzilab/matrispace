@@ -105,11 +105,23 @@ matrisome_signatures <- lapply(matrisome_signatures, function(genes) unique(stat
 ecm_signatures <- readRDS(file.path(stapp_data_dir, "ecm_ucell_signatures.rds"))
 ecm_signatures <- lapply(ecm_signatures, function(genes) unique(standardize_genes(genes)))
 
-# 4. Ligand-receptor database
+# 4. MatriComDB pairs: retain one row per unique heterotypic pair
 lr_database <- readRDS(file.path(stapp_data_dir, "ultimate_ecm_interactions_DEDUPLICATED.rds"))
 lr_database$Ligand <- standardize_genes(lr_database$Ligand)
 lr_database$Receptor <- standardize_genes(lr_database$Receptor)
-lr_database <- lr_database[!duplicated(lr_database[, c("Ligand", "Receptor")]), ]
+lr_database <- lr_database[
+  !is.na(lr_database$Ligand) & !is.na(lr_database$Receptor) &
+    lr_database$Ligand != "" & lr_database$Receptor != "" &
+    lr_database$Ligand != lr_database$Receptor,
+  ,
+  drop = FALSE
+]
+pair_gene_1 <- pmin(lr_database$Ligand, lr_database$Receptor)
+pair_gene_2 <- pmax(lr_database$Ligand, lr_database$Receptor)
+lr_database$Ligand <- pair_gene_1
+lr_database$Receptor <- pair_gene_2
+lr_database <- lr_database[!duplicated(lr_database[, c("Ligand", "Receptor")]), , drop = FALSE]
+rownames(lr_database) <- NULL
 
 # 5. ECM markers and bundled workbook
 xlsx_path <- file.path(stapp_data_dir, "ECM_domains_transformed4ScType.xlsx")

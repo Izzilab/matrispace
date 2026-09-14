@@ -12,7 +12,7 @@ If you use `matrispace` in your publications, please cite our preprint: **doi** 
 
 [![Badge](https://img.shields.io/badge/Manuscript-bioRxiv-red)](https://doi.org/10.64898/2026.04.26.720198)
 
-The [online MatriSpace app](http://matrinet.shinyapps.io/matrispace) provides an interactive interface over curated datasets and user uploads. The `matrispace` package exposes the same workflow in R for scripted analyses, custom modeling, and figure generation.
+The [online MatriSpace app](https://izzilab-matrispace.share.connect.posit.cloud/) provides an interactive interface over 240 curated datasets (180 cancer and 60 healthy tissue sections) and user uploads. The `matrispace` package exposes the same workflow in R for scripted analyses, custom modeling, and figure generation.
 
 ## Motivation
 
@@ -30,7 +30,7 @@ Accepts `Seurat` objects directly and converts `SpatialExperiment` objects via `
 
 - `score_matrisome()` — UCell scores for the six matrisome categories and curated subfamilies (Basement Membrane, Laminins, Matricellular, Mucins, Peri-vascular ECM).
 - `annotate_ecm_niches()` — ECM niche classification (e.g. Interstitial, Basement membrane), with continuous per-spot niche scores.
-- `score_lr_activity()` / `find_lr_enrichment()` — ECM-focused ligand-receptor co-expression within and across ECM niches.
+- `score_lr_activity()` / `find_lr_enrichment()` — spatial co-expression of unique heterotypic MatriComDB pairs in which at least one member is a matrisome gene. The legacy function names are retained for compatibility.
 
 ### Feature analysis
 
@@ -61,11 +61,11 @@ seurat_obj <- score_matrisome(seurat_obj)
 seurat_obj <- annotate_ecm_niches(seurat_obj)
 ```
 
-See the package vignettes for full differential-expression, ligand-receptor, and spatial-statistics examples.
+See the package vignettes for full differential-expression, matrisome-pair co-expression, and spatial-statistics examples.
 
 ## See also
 
-- [MatriSpace web app](http://matrinet.shinyapps.io/matrispace)
+- [MatriSpace web app](https://izzilab-matrispace.share.connect.posit.cloud/)
 - [MatriSpace app repository](https://github.com/Theayomideo/matrispace-app)
 - [The Matrisome Project](https://sites.google.com/uic.edu/matrisome/home)
 - [MatriCom](https://github.com/Izzilab/MatriCom)

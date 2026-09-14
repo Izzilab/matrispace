@@ -143,6 +143,6 @@ morans <- compute_morans_i(seurat_obj)
 
 # Related resources
 
-- [MatriSpace web app](http://matrinet.shinyapps.io/matrispace)
+- [MatriSpace web app](https://izzilab-matrispace.share.connect.posit.cloud/)
 - [MatriSpace app repository](https://github.com/Theayomideo/matrispace-app)
 - [The Matrisome Project](https://sites.google.com/uic.edu/matrisome/home)

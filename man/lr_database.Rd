@@ -3,12 +3,12 @@
 \docType{data}
 \name{lr_database}
 \alias{lr_database}
-\title{Ligand-Receptor Interaction Database}
+\title{MatriComDB Matrisome Pair Database}
 \format{
 A data frame with columns:
 \describe{
-\item{Ligand}{Ligand gene symbol}
-\item{Receptor}{Receptor gene symbol}
+\item{Ligand}{First pair-member gene symbol (legacy column name)}
+\item{Receptor}{Second pair-member gene symbol (legacy column name)}
 \item{Source}{Database source for the interaction}
 \item{Interaction_Type}{Type of interaction}
 \item{Database_Score}{Confidence score from source database}
@@ -18,12 +18,15 @@ A data frame with columns:
 lr_database
 }
 \description{
-Database of ECM-related ligand-receptor interactions for spatial
-co-expression analysis.
+Database of unique heterotypic MatriComDB pairs for spatial co-expression
+analysis. Every pair contains at least one matrisome gene. The source data
+include ECM ligand-receptor relationships and structural ECM interactions;
+a row should not be interpreted as signaling unless its annotation supports
+that interpretation.
 }
 \details{
-Contains 24,000+ deduplicated interactions curated from multiple databases,
-with focus on ECM-related signaling.
+Reciprocal records are collapsed to one alphabetically ordered pair and
+homomeric records are excluded.
 }
 \examples{
 data(lr_database)

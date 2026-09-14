@@ -24,7 +24,7 @@ reference:
     contents:
       - compute_lisa
       - compute_morans_i
-  - title: "Ligand-receptor"
+  - title: "Matrisome-pair co-expression"
     contents:
       - score_lr_activity
       - find_lr_enrichment
