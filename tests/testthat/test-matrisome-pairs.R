@@ -1,15 +1,15 @@
 # Tests for matrisome-pair co-expression functions
 
-test_that("lr_database loads correctly", {
-  data(lr_database)
-  expect_s3_class(lr_database, "data.frame")
-  expect_true("Ligand" %in% colnames(lr_database))
-  expect_true("Receptor" %in% colnames(lr_database))
-  expect_gt(nrow(lr_database), 10000)
-  expect_false(any(lr_database$Ligand == lr_database$Receptor))
+test_that("matrisome_pairs loads correctly", {
+  data(matrisome_pairs)
+  expect_s3_class(matrisome_pairs, "data.frame")
+  expect_true("Gene1" %in% colnames(matrisome_pairs))
+  expect_true("Gene2" %in% colnames(matrisome_pairs))
+  expect_gt(nrow(matrisome_pairs), 10000)
+  expect_false(any(matrisome_pairs$Gene1 == matrisome_pairs$Gene2))
   canonical_pairs <- paste(
-    pmin(lr_database$Ligand, lr_database$Receptor),
-    pmax(lr_database$Ligand, lr_database$Receptor),
+    pmin(matrisome_pairs$Gene1, matrisome_pairs$Gene2),
+    pmax(matrisome_pairs$Gene1, matrisome_pairs$Gene2),
     sep = "-"
   )
   expect_false(anyDuplicated(canonical_pairs) > 0)
@@ -17,18 +17,57 @@ test_that("lr_database loads correctly", {
 
 test_that("pair preparation removes homomeric and reciprocal rows", {
   pair_db <- data.frame(
-    Ligand = c("GeneB", "GeneA", "GeneC"),
-    Receptor = c("GeneA", "GeneB", "GeneC")
+    Gene1 = c("GeneB", "GeneA", "GeneC"),
+    Gene2 = c("GeneA", "GeneB", "GeneC")
   )
 
   result <- .prepare_matrisome_pairs(pair_db)
 
   expect_equal(nrow(result), 1)
-  expect_equal(result$Ligand, "GeneA")
-  expect_equal(result$Receptor, "GeneB")
+  expect_equal(result$Gene1, "GeneA")
+  expect_equal(result$Gene2, "GeneB")
 })
 
-test_that("aggregate_lr_axes handles empty input", {
+test_that("matrisome-pair scoring creates the renamed assay", {
+  counts <- Matrix::Matrix(
+    matrix(
+      c(4, 0, 1, 0, 9, 1),
+      nrow = 2,
+      dimnames = list(c("GeneA", "GeneB"), c("Spot1", "Spot2", "Spot3"))
+    ),
+    sparse = TRUE
+  )
+  seurat_obj <- Seurat::CreateSeuratObject(counts = counts)
+  seurat_obj <- Seurat::NormalizeData(seurat_obj, verbose = FALSE)
+  adjacency <- Matrix::Matrix(
+    matrix(c(0, 1, 0, 1, 0, 1, 0, 1, 0), nrow = 3),
+    dimnames = list(colnames(counts), colnames(counts)),
+    sparse = TRUE
+  )
+
+  result <- score_matrisome_pair_coexpression(
+    seurat_obj,
+    pair_db = data.frame(Gene1 = "GeneA", Gene2 = "GeneB"),
+    adj_matrix = adjacency,
+    assay = "RNA",
+    verbose = FALSE
+  )
+
+  expect_true("MATRISOMEPAIR" %in% SeuratObject::Assays(result))
+  expect_equal(rownames(result[["MATRISOMEPAIR"]]), "GeneA-GeneB")
+})
+
+test_that("renamed pair-analysis functions are exported", {
+  pair_functions <- c(
+    "score_matrisome_pair_coexpression",
+    "find_matrisome_pair_enrichment",
+    "aggregate_matrisome_pairs"
+  )
+
+  expect_true(all(pair_functions %in% getNamespaceExports("matrispace")))
+})
+
+test_that("aggregate_matrisome_pairs handles empty input", {
   empty_stats <- data.frame(
     feature = character(),
     cluster = character(),
@@ -38,12 +77,12 @@ test_that("aggregate_lr_axes handles empty input", {
   empty_means <- matrix(nrow = 0, ncol = 3,
                         dimnames = list(NULL, c("A", "B", "C")))
 
-  result <- aggregate_lr_axes(empty_stats, empty_means)
+  result <- aggregate_matrisome_pairs(empty_stats, empty_means)
   expect_type(result, "list")
   expect_equal(nrow(result$stats), 0)
 })
 
-test_that("aggregate_lr_axes coalesces reciprocal rows without axis terminology", {
+test_that("aggregate_matrisome_pairs coalesces reciprocal rows", {
   # Create test data with reciprocal pair
   stats_df <- data.frame(
     feature = c("GeneA-GeneB", "GeneB-GeneA", "GeneC-GeneD"),
@@ -58,7 +97,7 @@ test_that("aggregate_lr_axes coalesces reciprocal rows without axis terminology"
     dimnames = list(c("GeneA-GeneB", "GeneB-GeneA", "GeneC-GeneD"), "Cluster1")
   )
 
-  result <- aggregate_lr_axes(stats_df, means_matrix)
+  result <- aggregate_matrisome_pairs(stats_df, means_matrix)
 
   # Should have two unique unordered pairs
   expect_equal(nrow(result$stats), 2)

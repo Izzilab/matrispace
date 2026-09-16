@@ -27,7 +27,7 @@ includes functions for:
 \item{\code{\link{annotate_ecm_niches}}}{Classify ECM niches with ScType}
 \item{\code{\link{compute_lisa}}}{Local spatial association statistics}
 \item{\code{\link{compute_morans_i}}}{Global spatial autocorrelation}
-\item{\code{\link{score_lr_activity}}}{Matrisome-pair co-expression scoring}
+\item{\code{\link{score_matrisome_pair_coexpression}}}{Matrisome-pair co-expression scoring}
 }
 }
 
@@ -37,7 +37,7 @@ includes functions for:
 \item{\code{\link{matrisome_db}}}{Gene-to-category mapping database}
 \item{\code{\link{matrisome_signatures}}}{UCell gene signatures}
 \item{\code{\link{ecm_signatures}}}{ECM niche signatures}
-\item{\code{\link{lr_database}}}{Unique heterotypic MatriComDB pairs}
+\item{\code{\link{matrisome_pairs}}}{Unique heterotypic MatriComDB pairs}
 }
 }
 

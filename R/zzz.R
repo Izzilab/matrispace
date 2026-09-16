@@ -77,14 +77,14 @@ NULL
 #'
 #' Database of unique heterotypic MatriComDB pairs for spatial co-expression
 #' analysis. Every pair contains at least one matrisome gene. The source data
-#' include ECM ligand-receptor relationships and structural ECM interactions;
-#' a row should not be interpreted as signaling unless its annotation supports
-#' that interpretation.
+#' span multiple MatriComDB interaction classes, including annotated ECM
+#' communication records and structural ECM interactions. A row should not be
+#' interpreted as signaling unless its annotation supports that interpretation.
 #'
 #' @format A data frame with columns:
 #' \describe{
-#'   \item{Ligand}{First pair-member gene symbol (legacy column name)}
-#'   \item{Receptor}{Second pair-member gene symbol (legacy column name)}
+#'   \item{Gene1}{First pair-member gene symbol}
+#'   \item{Gene2}{Second pair-member gene symbol}
 #'   \item{Source}{Database source for the interaction}
 #'   \item{Interaction_Type}{Type of interaction}
 #'   \item{Database_Score}{Confidence score from source database}
@@ -95,11 +95,11 @@ NULL
 #' homomeric records are excluded.
 #'
 #' @examples
-#' data(lr_database)
-#' head(lr_database)
-#' nrow(lr_database)
+#' data(matrisome_pairs)
+#' head(matrisome_pairs)
+#' nrow(matrisome_pairs)
 #'
-"lr_database"
+"matrisome_pairs"
 
 #' ECM Niche Markers
 #'

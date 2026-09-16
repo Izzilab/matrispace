@@ -30,7 +30,7 @@ Accepts `Seurat` objects directly and converts `SpatialExperiment` objects via `
 
 - `score_matrisome()` — UCell scores for the six matrisome categories and curated subfamilies (Basement Membrane, Laminins, Matricellular, Mucins, Peri-vascular ECM).
 - `annotate_ecm_niches()` — ECM niche classification (e.g. Interstitial, Basement membrane), with continuous per-spot niche scores.
-- `score_lr_activity()` / `find_lr_enrichment()` — spatial co-expression of unique heterotypic MatriComDB pairs in which at least one member is a matrisome gene. The legacy function names are retained for compatibility.
+- `score_matrisome_pair_coexpression()` / `find_matrisome_pair_enrichment()` — spatial co-expression of unique heterotypic MatriComDB pairs in which at least one member is a matrisome gene.
 
 ### Feature analysis
 

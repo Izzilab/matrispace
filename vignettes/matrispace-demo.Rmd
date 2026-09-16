@@ -177,22 +177,22 @@ plot_spatial_blend(
 
 Matrisome-pair scoring measures spatial co-expression across adjacent spots for unique heterotypic MatriComDB pairs. It does not infer signaling direction or communication activity.
 
-```{r lr-score, cache=TRUE}
-seurat_obj <- score_lr_activity(seurat_obj, verbose = FALSE)
-cat("Matrisome pairs scored:", nrow(seurat_obj[["LRACTIVITY"]]))
+```{r matrisome-pair-score, cache=TRUE}
+seurat_obj <- score_matrisome_pair_coexpression(seurat_obj, verbose = FALSE)
+cat("Matrisome pairs scored:", nrow(seurat_obj[["MATRISOMEPAIR"]]))
 ```
 
 ## Enrichment by ECM Niche
 
-```{r lr-enrichment}
-lr_stats <- find_lr_enrichment(seurat_obj, group_by = "ecm_niche")
+```{r matrisome-pair-enrichment}
+pair_stats <- find_matrisome_pair_enrichment(seurat_obj, group_by = "ecm_niche")
 ```
 
 ### Top Interactions per Niche
 
-```{r lr-top}
+```{r matrisome-pair-top}
 get_top <- function(cluster, n = 5) {
-  lr_stats %>%
+  pair_stats %>%
     filter(cluster == !!cluster) %>%
     slice_max(avg_log2FC, n = n) %>%
     select(feature, avg_log2FC, perc_difference)
@@ -211,13 +211,13 @@ get_top("Basement_ECM")
 
 ## Heatmap
 
-```{r lr-heatmap, fig.height=7}
-top_lr <- lr_stats %>%
+```{r matrisome-pair-heatmap, fig.height=7}
+top_pairs <- pair_stats %>%
   group_by(cluster) %>%
   slice_max(avg_log2FC, n = 8) %>%
   ungroup()
 
-ggplot(top_lr, aes(x = cluster, y = reorder(feature, avg_log2FC), fill = avg_log2FC)) +
+ggplot(top_pairs, aes(x = cluster, y = reorder(feature, avg_log2FC), fill = avg_log2FC)) +
   geom_tile(color = "white") +
   scale_fill_gradient2(low = "#2166ac", mid = "white", high = "#b2182b", midpoint = 0) +
   theme_minimal(base_size = 11) +
@@ -316,8 +316,8 @@ ggplot(top_de, aes(x = cluster, y = reorder(gene, avg_log2FC), fill = avg_log2FC
 | `compute_lisa()` | Spatial co-localization statistics |
 | `plot_lisa()` | Visualize LISA clusters |
 | `plot_spatial_blend()` | Two-feature overlay |
-| `score_lr_activity()` | Matrisome-pair spatial co-expression scoring |
-| `find_lr_enrichment()` | Matrisome-pair enrichment per group |
+| `score_matrisome_pair_coexpression()` | Matrisome-pair spatial co-expression scoring |
+| `find_matrisome_pair_enrichment()` | Matrisome-pair enrichment per group |
 | `find_ecm_markers()` | DE between two groups |
 | `find_all_ecm_markers()` | DE for all clusters |
 

@@ -5,7 +5,7 @@
 NULL
 
 .prepare_matrisome_pairs <- function(pair_db) {
-  required_columns <- c("Ligand", "Receptor")
+  required_columns <- c("Gene1", "Gene2")
   missing_columns <- setdiff(required_columns, colnames(pair_db))
   if (length(missing_columns) > 0) {
     stop(
@@ -15,16 +15,16 @@ NULL
     )
   }
 
-  gene_1 <- trimws(as.character(pair_db$Ligand))
-  gene_2 <- trimws(as.character(pair_db$Receptor))
+  gene_1 <- trimws(as.character(pair_db$Gene1))
+  gene_2 <- trimws(as.character(pair_db$Gene2))
   keep <- !is.na(gene_1) & !is.na(gene_2) &
     nzchar(gene_1) & nzchar(gene_2) & gene_1 != gene_2
   pair_db <- pair_db[keep, , drop = FALSE]
   gene_1 <- gene_1[keep]
   gene_2 <- gene_2[keep]
 
-  pair_db$Ligand <- pmin(gene_1, gene_2)
-  pair_db$Receptor <- pmax(gene_1, gene_2)
+  pair_db$Gene1 <- pmin(gene_1, gene_2)
+  pair_db$Gene2 <- pmax(gene_1, gene_2)
   pair_db <- pair_db[!duplicated(pair_db[, required_columns, drop = FALSE]), , drop = FALSE]
   rownames(pair_db) <- NULL
   pair_db
@@ -38,16 +38,15 @@ NULL
 #' spots; it does not infer signaling direction or communication activity.
 #'
 #' @param seurat_obj A Seurat object
-#' @param lr_db MatriComDB pair data with legacy `Ligand` and `Receptor`
-#'   columns identifying the two pair members. Defaults to package data.
+#' @param pair_db MatriComDB pair data with `Gene1` and `Gene2` columns
+#'   identifying the two pair members. Defaults to package data.
 #' @param adj_matrix Sparse adjacency matrix for spatial neighbors.
 #'   If NULL, computed from coordinates.
 #' @param assay Assay to use (default: "SCT")
 #' @param layer Layer within assay (default: "data")
 #' @param verbose Print progress messages
 #'
-#' @return Seurat object with a "LRACTIVITY" assay added. The assay and
-#'   argument names are retained for backward compatibility.
+#' @return Seurat object with a "MATRISOMEPAIR" assay added.
 #'
 #' @details
 #' ## Scoring Formula
@@ -69,22 +68,22 @@ NULL
 #'
 #' @examples
 #' \dontrun{
-#' seurat_obj <- score_lr_activity(seurat_obj)
+#' seurat_obj <- score_matrisome_pair_coexpression(seurat_obj)
 #' }
 #'
 #' @export
-score_lr_activity <- function(seurat_obj,
-                              lr_db = NULL,
-                              adj_matrix = NULL,
-                              assay = NULL,
-                              layer = "data",
-                              verbose = TRUE) {
+score_matrisome_pair_coexpression <- function(seurat_obj,
+                                               pair_db = NULL,
+                                               adj_matrix = NULL,
+                                               assay = NULL,
+                                               layer = "data",
+                                               verbose = TRUE) {
   .assert_seurat_object(seurat_obj, "seurat_obj")
 
-  if (is.null(lr_db)) {
-    lr_db <- lr_database
+  if (is.null(pair_db)) {
+    pair_db <- matrisome_pairs
   }
-  lr_db <- .prepare_matrisome_pairs(lr_db)
+  pair_db <- .prepare_matrisome_pairs(pair_db)
 
   assay <- .resolve_assay(seurat_obj, assay)
   expr_matrix_sparse <- .safe_get_assay_data(seurat_obj, assay = assay, slot = layer)
@@ -120,26 +119,32 @@ score_lr_activity <- function(seurat_obj,
 
   # Keep pairs whose two genes are present in the expression data
   genes_in_data <- rownames(expr_matrix_sparse)
-  lr_db_filtered <- lr_db[lr_db$Ligand %in% genes_in_data &
-                            lr_db$Receptor %in% genes_in_data, ]
+  pair_db_filtered <- pair_db[
+    pair_db$Gene1 %in% genes_in_data & pair_db$Gene2 %in% genes_in_data,
+    ,
+    drop = FALSE
+  ]
 
-  if (nrow(lr_db_filtered) == 0) {
+  if (nrow(pair_db_filtered) == 0) {
     stop("No valid matrisome pairs were found in the expression data.")
   }
 
-  .message_if(verbose, sprintf("Scoring %d valid matrisome pairs...", nrow(lr_db_filtered)))
+  .message_if(
+    verbose,
+    sprintf("Scoring %d valid matrisome pairs...", nrow(pair_db_filtered))
+  )
 
   # Convert to dense for loop efficiency
   expr_matrix_dense <- as.matrix(expr_matrix_sparse)
   adj_matrix_dense <- as.matrix(adj_matrix)
 
   # Core calculation
-  list_of_scores <- vector("list", nrow(lr_db_filtered))
+  list_of_scores <- vector("list", nrow(pair_db_filtered))
 
-  for (i in seq_len(nrow(lr_db_filtered))) {
-    pair_row <- lr_db_filtered[i, ]
-    gene_1_expr <- expr_matrix_dense[pair_row$Ligand, ]
-    gene_2_expr <- expr_matrix_dense[pair_row$Receptor, ]
+  for (i in seq_len(nrow(pair_db_filtered))) {
+    pair_row <- pair_db_filtered[i, ]
+    gene_1_expr <- expr_matrix_dense[pair_row$Gene1, ]
+    gene_2_expr <- expr_matrix_dense[pair_row$Gene2, ]
 
     # Square root transformation
     sqrt_gene_1_expr <- sqrt(pmax(gene_1_expr, 0))
@@ -152,25 +157,34 @@ score_lr_activity <- function(seurat_obj,
     list_of_scores[[i]] <- sqrt_gene_2_expr * sum_sqrt_gene_1_neighbors
 
     if (isTRUE(verbose) && i %% 500 == 0) {
-      message(sprintf("  Processed %d / %d matrisome pairs", i, nrow(lr_db_filtered)))
+      message(sprintf(
+        "  Processed %d / %d matrisome pairs",
+        i,
+        nrow(pair_db_filtered)
+      ))
     }
   }
 
   # Assemble results
-  activity_matrix <- do.call(rbind, list_of_scores)
-  dimnames(activity_matrix) <- list(
-    paste(lr_db_filtered$Ligand, lr_db_filtered$Receptor, sep = "-"),
+  coexpression_matrix <- do.call(rbind, list_of_scores)
+  dimnames(coexpression_matrix) <- list(
+    paste(pair_db_filtered$Gene1, pair_db_filtered$Gene2, sep = "-"),
     colnames(expr_matrix_dense)
   )
 
-  sparse_activity_matrix <- methods::as(activity_matrix, "sparseMatrix")
+  sparse_coexpression_matrix <- methods::as(
+    coexpression_matrix,
+    "sparseMatrix"
+  )
 
-  seurat_obj[["LRACTIVITY"]] <- Seurat::CreateAssayObject(counts = sparse_activity_matrix)
+  seurat_obj[["MATRISOMEPAIR"]] <- Seurat::CreateAssayObject(
+    counts = sparse_coexpression_matrix
+  )
   seurat_obj <- Seurat::SetAssayData(
     seurat_obj,
-    assay = "LRACTIVITY",
+    assay = "MATRISOMEPAIR",
     layer = "data",
-    new.data = sparse_activity_matrix
+    new.data = sparse_coexpression_matrix
   )
 
   .message_if(verbose, "Done!")
@@ -182,19 +196,24 @@ score_lr_activity <- function(seurat_obj,
 #' Calculates enrichment statistics (avg_log2FC and percentage difference)
 #' for each matrisome pair across cell or spot groups.
 #'
-#' @param seurat_obj A Seurat object with LRACTIVITY assay
-#' @param assay_name Assay name (default: "LRACTIVITY")
+#' @param seurat_obj A Seurat object with a MATRISOMEPAIR assay
+#' @param assay_name Assay name (default: "MATRISOMEPAIR")
 #' @param group_by Metadata column for grouping (e.g., "ecm_niche")
 #'
 #' @return Data frame with columns: feature, cluster, avg_log2FC, perc_difference, pct.1, pct.2
 #'
 #' @examples
 #' \dontrun{
-#' lr_stats <- find_lr_enrichment(seurat_obj, group_by = "ecm_niche")
+#' pair_stats <- find_matrisome_pair_enrichment(
+#'   seurat_obj,
+#'   group_by = "ecm_niche"
+#' )
 #' }
 #'
 #' @export
-find_lr_enrichment <- function(seurat_obj, assay_name = "LRACTIVITY", group_by) {
+find_matrisome_pair_enrichment <- function(seurat_obj,
+                                           assay_name = "MATRISOMEPAIR",
+                                           group_by) {
   .assert_seurat_object(seurat_obj, "seurat_obj")
 
   if (!group_by %in% colnames(seurat_obj@meta.data)) {
@@ -234,22 +253,25 @@ find_lr_enrichment <- function(seurat_obj, assay_name = "LRACTIVITY", group_by) 
 #' Aggregate reciprocal rows into unique matrisome pairs
 #'
 #' Identifies reciprocal rows (e.g., A-B and B-A) and combines them into one
-#' unordered heterotypic pair. The legacy function name is retained for
-#' backward compatibility.
+#' unordered heterotypic pair.
 #'
-#' @param stats_df Long-format stats from \code{find_lr_enrichment}
+#' @param stats_df Long-format stats from
+#'   \code{find_matrisome_pair_enrichment}
 #' @param means_matrix Wide matrix with features as rows, clusters as columns
 #'
 #' @return List with coalesced \code{stats} data frame and \code{means} matrix
 #'
 #' @examples
 #' \dontrun{
-#' means_matrix <- AverageExpression(seurat_obj, assays = "LRACTIVITY")$LRACTIVITY
-#' coalesced <- aggregate_lr_axes(lr_stats, means_matrix)
+#' means_matrix <- AverageExpression(
+#'   seurat_obj,
+#'   assays = "MATRISOMEPAIR"
+#' )$MATRISOMEPAIR
+#' coalesced <- aggregate_matrisome_pairs(pair_stats, means_matrix)
 #' }
 #'
 #' @export
-aggregate_lr_axes <- function(stats_df, means_matrix) {
+aggregate_matrisome_pairs <- function(stats_df, means_matrix) {
 
   if (nrow(stats_df) == 0 || nrow(means_matrix) == 0) {
     warning("Empty stats_df or means_matrix")

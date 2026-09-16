@@ -106,22 +106,29 @@ ecm_signatures <- readRDS(file.path(stapp_data_dir, "ecm_ucell_signatures.rds"))
 ecm_signatures <- lapply(ecm_signatures, function(genes) unique(standardize_genes(genes)))
 
 # 4. MatriComDB pairs: retain one row per unique heterotypic pair
-lr_database <- readRDS(file.path(stapp_data_dir, "ultimate_ecm_interactions_DEDUPLICATED.rds"))
-lr_database$Ligand <- standardize_genes(lr_database$Ligand)
-lr_database$Receptor <- standardize_genes(lr_database$Receptor)
-lr_database <- lr_database[
-  !is.na(lr_database$Ligand) & !is.na(lr_database$Receptor) &
-    lr_database$Ligand != "" & lr_database$Receptor != "" &
-    lr_database$Ligand != lr_database$Receptor,
+matrisome_pairs <- readRDS(
+  file.path(stapp_data_dir, "ultimate_ecm_interactions_DEDUPLICATED.rds")
+)
+names(matrisome_pairs)[seq_len(2)] <- c("Gene1", "Gene2")
+matrisome_pairs$Gene1 <- standardize_genes(matrisome_pairs$Gene1)
+matrisome_pairs$Gene2 <- standardize_genes(matrisome_pairs$Gene2)
+matrisome_pairs <- matrisome_pairs[
+  !is.na(matrisome_pairs$Gene1) & !is.na(matrisome_pairs$Gene2) &
+    matrisome_pairs$Gene1 != "" & matrisome_pairs$Gene2 != "" &
+    matrisome_pairs$Gene1 != matrisome_pairs$Gene2,
   ,
   drop = FALSE
 ]
-pair_gene_1 <- pmin(lr_database$Ligand, lr_database$Receptor)
-pair_gene_2 <- pmax(lr_database$Ligand, lr_database$Receptor)
-lr_database$Ligand <- pair_gene_1
-lr_database$Receptor <- pair_gene_2
-lr_database <- lr_database[!duplicated(lr_database[, c("Ligand", "Receptor")]), , drop = FALSE]
-rownames(lr_database) <- NULL
+pair_gene_1 <- pmin(matrisome_pairs$Gene1, matrisome_pairs$Gene2)
+pair_gene_2 <- pmax(matrisome_pairs$Gene1, matrisome_pairs$Gene2)
+matrisome_pairs$Gene1 <- pair_gene_1
+matrisome_pairs$Gene2 <- pair_gene_2
+matrisome_pairs <- matrisome_pairs[
+  !duplicated(matrisome_pairs[, c("Gene1", "Gene2")]),
+  ,
+  drop = FALSE
+]
+rownames(matrisome_pairs) <- NULL
 
 # 5. ECM markers and bundled workbook
 xlsx_path <- file.path(stapp_data_dir, "ECM_domains_transformed4ScType.xlsx")
@@ -154,7 +161,7 @@ file.copy(
 usethis::use_data(matrisome_db, overwrite = TRUE)
 usethis::use_data(matrisome_signatures, overwrite = TRUE)
 usethis::use_data(ecm_signatures, overwrite = TRUE)
-usethis::use_data(lr_database, overwrite = TRUE)
+usethis::use_data(matrisome_pairs, overwrite = TRUE)
 usethis::use_data(ecm_markers, overwrite = TRUE)
 
 message("Data preparation complete.")

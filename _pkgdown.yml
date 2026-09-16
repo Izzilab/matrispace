@@ -26,9 +26,9 @@ reference:
       - compute_morans_i
   - title: "Matrisome-pair co-expression"
     contents:
-      - score_lr_activity
-      - find_lr_enrichment
-      - aggregate_lr_axes
+      - score_matrisome_pair_coexpression
+      - find_matrisome_pair_enrichment
+      - aggregate_matrisome_pairs
   - title: "Visualization"
     contents:
       - plot_spatial_feature
@@ -41,7 +41,7 @@ reference:
       - matrisome_db
       - matrisome_signatures
       - ecm_signatures
-      - lr_database
+      - matrisome_pairs
       - ecm_markers
   - title: "Deprecated"
     contents:

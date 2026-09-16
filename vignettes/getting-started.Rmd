@@ -69,7 +69,7 @@ The main profiling functions mirror the MatriSpace app workflow.
 ```{r profiling, eval=FALSE}
 seurat_obj <- score_matrisome(seurat_obj)
 seurat_obj <- annotate_ecm_niches(seurat_obj)
-seurat_obj <- score_lr_activity(seurat_obj)
+seurat_obj <- score_matrisome_pair_coexpression(seurat_obj)
 ```
 
 Built-in reference objects are available directly:
@@ -78,7 +78,7 @@ Built-in reference objects are available directly:
 data(matrisome_db)
 data(matrisome_signatures)
 data(ecm_signatures)
-data(lr_database)
+data(matrisome_pairs)
 
 nrow(matrisome_db)
 length(matrisome_signatures)
