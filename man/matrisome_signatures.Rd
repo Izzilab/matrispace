@@ -19,6 +19,7 @@ Named list of gene vectors for MatriSpace matrisome categories and subcategories
 formatted for use with UCell scoring.
 }
 \details{
+The six main categories exclude F8 and USH2A; functional signatures retain them.
 Includes signatures for:
 \itemize{
 \item 6 main categories: Collagens, ECM Glycoproteins, Proteoglycans,

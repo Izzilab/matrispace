@@ -83,6 +83,7 @@ parse_marker_genes <- function(value) {
 # 1. Matrisome reference database
 matrisome_db <- readRDS(file.path(stapp_data_dir, "matrisome_v2.rds"))
 matrisome_db$gene <- standardize_genes(matrisome_db$gene)
+matrisome_db <- matrisome_db[!duplicated(matrisome_db$gene), , drop = FALSE]
 
 # 2. Matrisome signatures derived from the reference table
 matrisome_signatures <- list(
@@ -93,6 +94,8 @@ matrisome_signatures <- list(
   secreted_factors = matrisome_db$gene[matrisome_db$notes == "Secreted Factors"],
   `ecm-affiliated_proteins` = matrisome_db$gene[matrisome_db$notes == "ECM-affiliated Proteins"]
 )
+
+matrisome_signatures <- lapply(matrisome_signatures, setdiff, y = c("F8", "USH2A"))
 
 for (sig_name in names(subcategory_map)) {
   matrisome_signatures[[sig_name]] <- matrisome_db$gene[

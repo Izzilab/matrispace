@@ -41,6 +41,10 @@ Accepts `Seurat` objects directly and converts `SpatialExperiment` objects via `
   - `find_spatially_corrected_ecm_markers()` — within-sample, two-stage Wilcoxon screen followed by a `spaMM` Matérn spatial mixed model.
   - `find_ecm_de_samples(pseudobulk = TRUE)` — cross-sample pseudobulk testing with `DESeq2`, with optional cluster and blocking adjustment.
 
+## Reference coverage
+
+The full reference contains 1,027 canonical matrisome genes plus F8 and USH2A for functional signatures. The six main category signatures and default ECM gene selection exclude those two additions. The 16,876 unique non-self pairs cover 929 canonical genes; the Janesick breast cancer input contains 990 detected canonical genes.
+
 ## Installation
 
 Requires R (>= 4.1.0).

@@ -28,6 +28,7 @@ matrisome_db
 }
 \description{
 A data frame mapping genes to matrisome categories and subcategories.
+Contains 1,027 canonical genes plus F8 and USH2A for functional signatures.
 }
 \examples{
 data(matrisome_db)

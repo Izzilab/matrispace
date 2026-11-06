@@ -6,6 +6,7 @@ NULL
 #' Matrisome Gene Database
 #'
 #' A data frame mapping genes to matrisome categories and subcategories.
+#' Contains 1,027 canonical genes plus F8 and USH2A for functional signatures.
 #'
 #' @format A data frame with columns:
 #' \describe{
@@ -42,6 +43,7 @@ NULL
 #' }
 #'
 #' @details
+#' The six main categories exclude F8 and USH2A; functional signatures retain them.
 #' Includes signatures for:
 #' \itemize{
 #'   \item 6 main categories: Collagens, ECM Glycoproteins, Proteoglycans,

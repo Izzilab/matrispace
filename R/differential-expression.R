@@ -16,7 +16,7 @@ utils::globalVariables(c("gene", "division", "notes", "p_val_adj", "cluster"))
 #' @keywords internal
 #' @noRd
 .get_ecm_genes <- function(categories = NULL) {
-  db <- matrisome_db
+  db <- matrisome_db[!matrisome_db$gene %in% c("F8", "USH2A"), , drop = FALSE]
 
   if (is.null(categories)) {
     return(unique(db$gene))
